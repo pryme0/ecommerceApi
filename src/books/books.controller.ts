@@ -39,7 +39,6 @@ export class BooksController {
     return await this.booksService.create(createBookDto);
   }
 
-  @ApiBearerAuth('JWT-TOKEN')
   @ApiOkResponse({
     status: 200,
     type: [BookDto],
@@ -47,7 +46,6 @@ export class BooksController {
   })
   @HttpCode(200)
   @Get()
-  @UseGuards(JwtGuard)
   async findAll(
     @Query() filter: FindBookDto,
   ): Promise<FindBookAndCountResponse> {
