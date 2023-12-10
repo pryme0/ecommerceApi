@@ -32,13 +32,9 @@ export class RemoveBookFromCartDto {
   @ApiProperty({ description: 'bookId' })
   @IsString()
   bookId: string;
-
-  @ApiProperty({ description: 'cartItemId' })
-  @IsString()
-  cartItemId: string;
 }
 
-export class ResponseMessageSto {
+export class ResponseMessageDto {
   @ApiProperty({ description: 'message' })
   @IsString()
   message: string;

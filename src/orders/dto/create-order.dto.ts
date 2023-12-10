@@ -3,11 +3,6 @@ import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { UserDto } from 'src/users/dto';
 
 export class CreateOrderDto {
-  @ApiProperty({ description: 'totalAmount' })
-  @IsNumber()
-  @IsNotEmpty()
-  totalAmount: number;
-
   @ApiProperty({ description: 'books', type: [String] })
   @IsNotEmpty()
   @IsArray()

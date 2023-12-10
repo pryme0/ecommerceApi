@@ -13,12 +13,11 @@ import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import {
   RemoveBookFromCartDto,
-  ResponseMessageSto,
   UpdateCartDto,
 } from './dto/update-cart-item.dto';
-import { CartDto, FindCardByIdDto, FindCartDto } from './dto';
+import { CartDto, FindCartDto } from './dto';
 import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
-import { UpdateResultDto, UserDto } from 'src/users/dto';
+import { UserDto } from 'src/users/dto';
 import { GetUser, JwtGuard } from 'src/helpers';
 
 @Controller('cart')
@@ -85,14 +84,12 @@ export class CartController {
   @ApiBearerAuth('JWT-TOKEN')
   @ApiOkResponse({
     status: 200,
-    type: ResponseMessageSto,
+    type: CartDto,
     description: 'Removes a book from a cart',
   })
   @HttpCode(200)
   @Post('/remove-item')
-  removeBookFromCart(
-    @Body() body: RemoveBookFromCartDto,
-  ): Promise<ResponseMessageSto> {
+  removeBookFromCart(@Body() body: RemoveBookFromCartDto): Promise<CartDto> {
     return this.cartService.removeBookFromCart(body);
   }
 }

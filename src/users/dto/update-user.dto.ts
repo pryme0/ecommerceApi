@@ -6,17 +6,22 @@ export class UpdateUserData {
   @ApiPropertyOptional({ description: 'email' })
   @IsString()
   @IsOptional()
-  email: string;
+  email?: string;
 
   @ApiPropertyOptional({ description: 'firstName' })
   @IsString()
   @IsOptional()
-  firstName: string;
+  firstName?: string;
+
+  @ApiPropertyOptional({ description: 'points' })
+  @IsNumber()
+  @IsOptional()
+  points?: number;
 
   @ApiPropertyOptional({ description: 'lastName' })
   @IsString()
   @IsOptional()
-  lastName: string;
+  lastName?: string;
 }
 
 export class UpdateUserDto {

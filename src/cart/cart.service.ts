@@ -7,7 +7,7 @@ import { CreateCartDto } from './dto/create-cart.dto';
 import {
   RemoveBookFromCartDto,
   ResetCartDto,
-  ResponseMessageSto,
+  ResponseMessageDto,
   UpdateCartDto,
 } from './dto/update-cart-item.dto';
 import { CartRepository, CartItemRepository } from '@varyOne/repositories';
@@ -42,7 +42,7 @@ export class CartService {
   async findAll(filter: FindCartDto): Promise<CartDto[]> {
     const carts = await this.cartRepository.find({
       where: { ...filter },
-      relations: ['books'],
+      relations: ['books', 'cart_books_book'],
     });
 
     return carts;
@@ -51,10 +51,8 @@ export class CartService {
   async findOne(filter: FindCardByIdDto): Promise<CartDto> {
     const cart = await this.cartRepository.findOne({
       where: { ...filter },
-      relations: ['books'],
+      relations: ['cartItems', 'cartItems.book'],
     });
-
-    console.log({ cart });
 
     return cart;
   }
@@ -63,7 +61,7 @@ export class CartService {
     // Find the cart
     const cart = await this.cartRepository.findOne({
       where: { id: input.id },
-      relations: ['books'],
+      relations: ['cartItems', 'cartItems.book'],
     });
 
     if (!cart) {
@@ -78,13 +76,11 @@ export class CartService {
     }
 
     if (book.quantity < input.data.quantity) {
-      throw new BadRequestException(
-        `Out of Stock only ${book.quantity} units available`,
-      );
+      throw new BadRequestException(`Out of Stock only `);
     }
 
     const existingCartItem = await this.cartItemRepository.findOne({
-      where: { book: { id: input.data.bookId } },
+      where: { book: { id: input.data.bookId }, cart: { id: input.id } },
       relations: ['book'],
     });
 
@@ -107,16 +103,12 @@ export class CartService {
 
       await this.cartRepository
         .createQueryBuilder('cart')
-        .relation('books')
+        .relation('cartItems')
         .of(cart)
         .add(input.data.bookId);
     }
 
     const totalCost = book.price * input.data.quantity;
-
-    const newTotalCost = (cart.total += totalCost);
-
-    const updateQuantity = (cart.quantity += input.data.quantity);
 
     this.bookService.update({
       id: book.id,
@@ -125,46 +117,77 @@ export class CartService {
 
     // Save changes to the database
     await this.cartRepository.update(cart.id, {
-      total: newTotalCost,
-      quantity: updateQuantity,
+      total: cart.total + totalCost,
+      quantity: cart.quantity + input.data.quantity,
     });
 
     const updatedCart = await this.cartRepository.findOne({
       where: { id: cart.id },
+      relations: ['cartItems', 'cartItems.book'],
     });
 
     return updatedCart;
   }
 
-  async removeBookFromCart(
-    input: RemoveBookFromCartDto,
-  ): Promise<ResponseMessageSto> {
+  async removeBookFromCart(input: RemoveBookFromCartDto): Promise<CartDto> {
     const cart = await this.cartRepository.findOne({
       where: { id: input.cartId },
-      relations: ['books'],
+      relations: ['cartItems', 'cartItems.book'],
     });
 
-    const removedBook = await this.cartRepository
+    if (!cart) {
+      throw new NotFoundException('Incorrect cart details');
+    }
+
+    const cartItem = await this.cartItemRepository.findOne({
+      where: { book: { id: input.bookId }, cart: { id: input.cartId } },
+      relations: ['book', 'cart'],
+    });
+
+    if (!cartItem) {
+      throw new NotFoundException('Cart Item not found');
+    }
+
+    await this.cartRepository
       .createQueryBuilder('cart')
-      .relation('books')
+      .relation('cartItems')
       .of(cart)
       .remove(input.bookId);
 
-    await this.cartItemRepository.delete(input.cartItemId);
+    await this.cartItemRepository.delete(cartItem.id);
 
-    return { message: 'Item removed successfully' };
+    const newQuantity = cart.quantity - cartItem.quantity;
+    const totalLoss = cartItem.quantity * cartItem.book.price;
+    const newTotal = cart.total - totalLoss;
+
+    await this.cartRepository.update(cart.id, {
+      quantity: newQuantity,
+      total: newTotal,
+    });
+
+    const updatedCart = await this.cartRepository.findOne({
+      where: { id: input.cartId },
+      relations: ['cartItems', 'cartItems.book'],
+    });
+
+    return updatedCart;
   }
 
-  async resetCart(input: ResetCartDto): Promise<ResponseMessageSto> {
+  async resetCart(input: ResetCartDto): Promise<CartDto> {
     // Remove all books from the cart
-    await this.cartRepository
+
+    const cart = await this.cartRepository.findOne({
+      where: { id: input.cartId },
+      relations: ['cartItems', 'cartItems.book'],
+    });
+
+    const queryUp = await this.cartRepository
       .createQueryBuilder('cart')
-      .relation('books')
+      .relation('cartItems')
       .of(input.cartId)
-      .remove([]);
+      .remove(cart.cartItems);
 
     // Reset cart quantity and total
-
     await this.cartRepository.update(input.cartId, {
       quantity: 0,
       total: 0,
@@ -173,6 +196,10 @@ export class CartService {
     // Delete all related CartItem entities
     await this.cartItemRepository.delete({ cart: { id: input.cartId } });
 
-    return { message: 'Cart Reset Successfully' };
+    const updatedCart = await this.cartRepository.findOne({
+      where: { id: input.cartId },
+    });
+
+    return updatedCart;
   }
 }

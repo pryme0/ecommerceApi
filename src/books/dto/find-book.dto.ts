@@ -55,6 +55,14 @@ export class FindBookDto {
   @IsNumber()
   @IsOptional()
   ids?: FindByIdsDto;
+
+  @ApiPropertyOptional({ description: 'Number of items to skip', type: Number })
+  @IsOptional()
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Number of items to take', type: Number })
+  @IsOptional()
+  pageSize?: number;
 }
 
 export class FindByIdDto {

@@ -27,9 +27,8 @@ export class Cart {
   @Column()
   quantity: number;
 
-  @ManyToMany(() => Book, (book) => book.cartItems)
-  @JoinTable()
-  books: CartItem[];
+  @OneToMany(() => CartItem, (cartItem) => cartItem.cart, { cascade: true })
+  cartItems: CartItem[];
 
   @OneToOne(() => User, (user) => user.cart)
   @JoinColumn()

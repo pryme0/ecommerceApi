@@ -1,7 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { BookDto, FindByIdDto, FindBookDto } from './dto';
+import {
+  BookDto,
+  FindByIdDto,
+  FindBookDto,
+  FindBookAndCountResponse,
+} from './dto';
 import { BookRepository } from '@varyOne/repositories';
 import { UsersService } from 'src/users/users.service';
 import { UpdateResultDto } from 'src/users/dto';
@@ -12,8 +17,6 @@ export class BooksService {
   constructor(private readonly bokRepository: BookRepository) {}
 
   async create(input: CreateBookDto): Promise<BookDto> {
-    console.log({ input });
-
     const checkBookExists = await this.bokRepository.findOne({
       where: { title: input.title },
     });
@@ -26,12 +29,23 @@ export class BooksService {
     return await this.bokRepository.save(bookObject);
   }
 
-  async findAll(filter: FindBookDto): Promise<BookDto[]> {
-    return await this.bokRepository.find({ where: { ...filter } });
+  async findAll(filter: FindBookDto): Promise<FindBookAndCountResponse> {
+    const skip = (filter.page - 1) * filter.pageSize;
+    const take = filter.pageSize;
+
+    delete filter.page;
+    delete filter.pageSize;
+
+    const resp = await this.bokRepository.findAndCount({
+      where: { ...filter },
+      skip: skip || 0,
+      take: take || 5,
+    });
+
+    return { books: resp[0], count: resp[1] };
   }
 
   async findByIds(ids: string[]) {
-    console.log(ids);
     return await this.bokRepository.findBy({
       id: In(ids),
     });

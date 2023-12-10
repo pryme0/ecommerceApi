@@ -25,7 +25,7 @@ export class CartDto {
     description: 'Cart books',
     type: () => [CartItemDto],
   })
-  books: CartItemDto[];
+  cartItems: CartItemDto[];
 
   @ApiProperty({
     description: 'Creation date',

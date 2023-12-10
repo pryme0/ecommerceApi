@@ -1,11 +1,9 @@
 import { CartItem } from 'src/cart/entities';
-import { Cart } from 'src/cart/entities/cart.entity';
 import { Order } from 'src/orders/entities/order.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToMany,
   JoinTable,
   ManyToMany,
   CreateDateColumn,
@@ -33,13 +31,12 @@ export class Book {
   @Column()
   quantity: number;
 
+  @Column({ type: 'varchar', array: true, default: '{}' })
+  tags: string[];
+
   @ManyToMany(() => CartItem, (cartItem) => cartItem.book, { cascade: true })
   @JoinTable()
   cartItems: CartItem[];
-
-  @ManyToMany(() => Cart, (cart) => cart.books)
-  @JoinTable()
-  cart: Cart[];
 
   @ManyToMany(() => Order, (order) => order.books)
   orders: Order[];

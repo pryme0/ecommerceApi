@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsArray, ArrayUnique } from 'class-validator';
 
 export class CreateBookDto {
   @ApiProperty({
@@ -18,6 +18,14 @@ export class CreateBookDto {
     description: 'thumbnail',
   })
   thumbnail: string;
+
+  @ApiProperty({
+    description: 'tags',
+    type: [String],
+  })
+  @IsArray()
+  @ArrayUnique()
+  tags: string[];
 
   @ApiProperty({
     description: 'rating',

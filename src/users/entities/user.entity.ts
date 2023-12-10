@@ -30,6 +30,9 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ default: 100 })
+  points: number;
+
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
 

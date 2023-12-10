@@ -28,6 +28,12 @@ export class BookDto {
   thumbnail: string;
 
   @ApiProperty({
+    description: 'tags',
+    type: [String],
+  })
+  tags: string[];
+
+  @ApiProperty({
     description: 'rating',
   })
   @IsNumber()
@@ -52,4 +58,17 @@ export class BookDto {
     format: 'date-time',
   })
   updatedAt: Timestamp;
+}
+
+export class FindBookAndCountResponse {
+  @ApiProperty({
+    description: 'books',
+    type: () => [BookDto],
+  })
+  books: BookDto[];
+
+  @ApiProperty({
+    description: 'Query count',
+  })
+  count: number;
 }

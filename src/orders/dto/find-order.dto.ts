@@ -13,8 +13,16 @@ export class FindOrderDto {
   @IsOptional()
   id?: string;
 
-  @ApiPropertyOptional({ description: 'orderId', type: FindUserByIdDto })
+  @ApiPropertyOptional({ description: 'orderId' })
   @IsString()
   @IsOptional()
-  user?: FindUserByIdDto;
+  userId?: string;
+
+  @ApiPropertyOptional({ description: 'Number of items to skip', type: Number })
+  @IsOptional()
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Number of items to take', type: Number })
+  @IsOptional()
+  pageSize?: number;
 }

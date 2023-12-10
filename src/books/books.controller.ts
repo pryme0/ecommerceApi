@@ -12,7 +12,12 @@ import {
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { FindByIdDto, FindBookDto, BookDto } from './dto';
+import {
+  FindByIdDto,
+  FindBookDto,
+  BookDto,
+  FindBookAndCountResponse,
+} from './dto';
 import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { UpdateResultDto } from 'src/users/dto';
 import { JwtGuard } from 'src/helpers';
@@ -43,8 +48,9 @@ export class BooksController {
   @HttpCode(200)
   @Get()
   @UseGuards(JwtGuard)
-  async findAll(@Query() filter: FindBookDto): Promise<BookDto[]> {
-    console.log({ filter });
+  async findAll(
+    @Query() filter: FindBookDto,
+  ): Promise<FindBookAndCountResponse> {
     return await this.booksService.findAll(filter);
   }
 

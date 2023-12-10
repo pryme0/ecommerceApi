@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 import { CartDto } from 'src/cart/dto';
 import { OrderDto } from 'src/orders/dto/order.dto';
 import { Timestamp } from 'typeorm';
@@ -24,6 +24,10 @@ export class UserDto {
   @ApiProperty({ description: 'email' })
   @IsString()
   password: string;
+
+  @ApiProperty({ description: 'points' })
+  @IsNumber()
+  points: number;
 
   @ApiProperty({ description: 'cart', type: () => [OrderDto] })
   orders: OrderDto[];
